@@ -22,7 +22,7 @@ docker-compose up -d
 
 This will create the following application:
 
-![](./docs/architecture.drawio.png)
+![Figure 1: Solution Architecture](./docs/architecture.drawio.png)
 
 Will also initialize the database with tables and schemas
 
@@ -44,7 +44,7 @@ python src/init/init.py
 
 Script to convert denormalized table into three separate tables. Star schema with private and foreign keys: Facts and dimensions
 
-![](./docs/schema.drawio.png)
+![Figure 2: Database Schema](./docs/schema.drawio.png)
 
 ## Usage
 
