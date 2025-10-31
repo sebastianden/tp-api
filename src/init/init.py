@@ -27,6 +27,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPUT_DATA_PATH = os.path.join(SCRIPT_DIR, "tp_reviews.xlsx")
 
 # Database connection parameters
+# pylint: disable=R0801
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "port": int(os.getenv("DB_PORT", "5432")),
@@ -219,8 +220,8 @@ def verify_tables(conn: psycopg2.extensions.connection) -> None:
     print(f"- Reviews: {review_count}", "\n")
 
 
-if __name__ == "__main__":
-
+def main() -> None:
+    """Main function to load, process, insert, and verify data."""
     try:
         # Connect to database
         conn = psycopg2.connect(**DB_CONFIG)
@@ -242,3 +243,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error in main process: {e}")
         raise
+
+
+if __name__ == "__main__":
+
+    main()

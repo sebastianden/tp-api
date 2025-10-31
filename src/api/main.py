@@ -1,23 +1,30 @@
+"""FastAPI application for review database queries.
+
+This module provides a REST API for querying a PostgreSQL database for review
+data. The API supports filtering and pagination for users, businesses, and
+reviews with optional CSV export functionality.
+
+Usage:
+    fastapi run
+
+TODO: Usage and endpoints
+"""
+
+import csv
+import io
+import os
+from datetime import datetime
+from typing import List, Optional
+
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.responses import StreamingResponse
-from typing import Optional, List
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel
-from datetime import datetime
-import os
-import io
-import csv
 
 app = FastAPI(
     title="TP API", description="API for making ad-hoc queries on the reviews database"
 )
-
-TABLES = {
-    "users": "users",
-    "businesses": "businesses",
-    "reviews": "review_details",
-}
 
 # Database connection parameters
 DB_CONFIG = {
@@ -31,6 +38,8 @@ DB_CONFIG = {
 
 # Pydantic models for response schemas
 class User(BaseModel):
+    """User/reviewer data model."""
+
     id: str
     name: str
     email: str
@@ -38,11 +47,15 @@ class User(BaseModel):
 
 
 class Business(BaseModel):
+    """Business data model."""
+
     id: str
     name: str
 
 
 class Review(BaseModel):
+    """Review data model with denormalized user and business information."""
+
     review_id: str
     user_id: str
     business_id: str
@@ -65,7 +78,7 @@ def get_db_connection():
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Database connection error: {str(e)}"
-        )
+        ) from e
 
 
 @app.get("/")
@@ -91,7 +104,7 @@ def get_users(
 
     try:
         # Build query with filters
-        query = f"SELECT * FROM {TABLES["users"]} WHERE 1=1"
+        query = "SELECT * FROM users WHERE 1=1"
         params = []
 
         if country:
@@ -115,7 +128,7 @@ def get_users(
         return [User(**user) for user in users]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
     finally:
         cursor.close()
         conn.close()
@@ -133,7 +146,7 @@ def get_businesses(
 
     try:
         # Build query with filters
-        query = f"SELECT * FROM {TABLES["businesses"]} WHERE 1=1"
+        query = "SELECT * FROM businesses WHERE 1=1"
         params = []
 
         if name:
@@ -149,12 +162,13 @@ def get_businesses(
         return [Business(**business) for business in businesses]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
     finally:
         cursor.close()
         conn.close()
 
 
+# pylint: disable=too-many-arguments, too-many-locals, too-many-positional-arguments
 @app.get("/reviews", response_model=List[Review])
 def get_reviews(
     rating: Optional[int] = Query(None, description="Filter by rating", ge=1, le=5),
@@ -182,7 +196,7 @@ def get_reviews(
 
     try:
         # Use the view created in schema.sql for detailed information
-        query = f"SELECT * FROM {TABLES['reviews']} WHERE 1=1"
+        query = "SELECT * FROM review_details WHERE 1=1"
         params = []
 
         if rating:
@@ -234,7 +248,7 @@ def get_reviews(
         return [Review(**review) for review in reviews]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
     finally:
         cursor.close()
         conn.close()
@@ -267,10 +281,3 @@ def create_csv_response(data: List[dict], filename: str) -> StreamingResponse:
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    # TODO: Why?
-    uvicorn.run(app, host="0.0.0.0", port=8000)

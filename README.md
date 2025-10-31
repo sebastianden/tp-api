@@ -36,7 +36,7 @@ To test our API we need to load the data from the `tp_reviews.xlsx` into the dat
 python -m venv .venv
 # Activate it
 source .venv/bin/activate
-# Install (developement) requirements
+# Install (development) requirements
 pip install -r requirements.txt
 # Execute the init script
 python src/init/init.py
@@ -68,6 +68,10 @@ Provide user account information for user Z
 Contributions are welcome! Please follow these step to make sure you set up your local development correctly and adhere to the conventions followed in the project:
 
 initialize pre-commit hooks
+
+```
+pre-commit install --hook-type pre-commit --hook-type commit-msg
+```
 
 venv
 

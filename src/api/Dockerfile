@@ -10,10 +10,10 @@ COPY ../../requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . ./src/api/
+COPY . ./app
 
 # Expose port
 EXPOSE 8000
 
 # Command to run the FastAPI application
-CMD ["fastapi", "run", "src/api/main.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["fastapi", "run", "./app/main.py", "--host", "0.0.0.0", "--port", "8000"]

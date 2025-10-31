@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: no-commit-to-branch
         name: branch naming convention
-        args: ["--pattern", '^(?!((feature|bugfix)\/[a-z0-9-]+)$).*']
+        args: ["--pattern", '^(?!((feature|bugfix)\/[a-z0-9-]+|main)$).*']
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -39,13 +39,11 @@ repos:
       - id: black
         name: black
         language_version: python3
-
-  # TODO: Do these work? Maybe from local venv?
   - repo: local
     hooks:
       - id: pylint
         name: pylint
-        entry: pylint
+        entry: pylint src/
         language: system
         types: [python]
         require_serial: true
@@ -54,4 +52,4 @@ repos:
     hooks:
       - id: bandit
         name: bandit
-        args: ["-r", "."]
+        args: ["-r", "./src/"]
