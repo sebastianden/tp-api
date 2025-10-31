@@ -64,7 +64,7 @@ Provide reviews by user Y (e.g. "David Knox"):
 http://localhost:8000/reviews?user_name=David%20Knox
 ```
 
-Provide user account information for user Z (e.g. "David Knox"):
+Provide user account information for user Z (e.g. "Sahra Barker"):
 
 ```
 http://localhost:8000/users?name=Sarah%20Barker
