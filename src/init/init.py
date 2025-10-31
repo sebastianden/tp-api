@@ -25,15 +25,27 @@ from psycopg2.extras import execute_values
 # Input file path - relative to script location
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPUT_DATA_PATH = os.path.join(SCRIPT_DIR, "tp_reviews.xlsx")
+PASSWORD_FILE = os.path.join(SCRIPT_DIR, "../../secrets/db_password.txt")
+
 
 # Database connection parameters
+def get_db_password():
+    """Get database password from Docker secret file."""
+    try:
+        with open(PASSWORD_FILE, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except Exception as e:
+        print(f"❌ Error loading password file: {e}")
+        raise
+
+
 # pylint: disable=R0801
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "port": int(os.getenv("DB_PORT", "5432")),
     "database": os.getenv("DB_NAME", "postgres"),
     "user": os.getenv("DB_USER", "postgres"),
-    "password": os.getenv("DB_PASSWORD", "password"),
+    "password": get_db_password(),
 }
 
 

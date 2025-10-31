@@ -31,13 +31,24 @@ app = FastAPI(
     title="TP API", description="API for making ad-hoc queries on the reviews database"
 )
 
+
 # Database connection parameters
+def get_db_password():
+    """Get database password from Docker secret file."""
+    password_file = os.getenv("DB_PASSWORD_FILE")
+    try:
+        with open(password_file, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except Exception as e:
+        raise RuntimeError(f"Error reading password file {password_file}: {e}") from e
+
+
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "port": int(os.getenv("DB_PORT", "5432")),
     "database": os.getenv("DB_NAME", "postgres"),
     "user": os.getenv("DB_USER", "postgres"),
-    "password": os.getenv("DB_PASSWORD", "password"),
+    "password": get_db_password(),
 }
 
 

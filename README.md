@@ -14,6 +14,15 @@ This repository contains a simple PoC of an API to execute ad-hoc data requests 
 
 ### 1. Deploy Database and API
 
+First we need to create a secret database password. Docker Compose will look for a file called `db_password.txt` in a folder called `secrets`:
+
+```bash
+# Create the secrets folder in the root of the repository
+mkdir secrets
+# Create a file containing your database password
+echo "YOUR-SUPER-SECRET-PASSWORD" > secrets/db_password.txt
+```
+
 Use Docker Compose to deploy all the necessary infrastructure to run the PoC. In the root directory run:
 
 ```bash
