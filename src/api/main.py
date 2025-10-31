@@ -14,7 +14,7 @@ app = FastAPI(
 )
 
 TABLES = {
-    "reviewers": "reviewers",
+    "users": "users",
     "businesses": "businesses",
     "reviews": "review_details",
 }
@@ -30,7 +30,7 @@ DB_CONFIG = {
 
 
 # Pydantic models for response schemas
-class Reviewer(BaseModel):
+class User(BaseModel):
     id: str
     name: str
     email: str
@@ -46,9 +46,9 @@ class Review(BaseModel):
     review_id: str
     user_id: str
     business_id: str
-    reviewer_name: str
-    reviewer_email: str
-    reviewer_country: Optional[str] = None
+    user_name: str
+    user_email: str
+    user_country: Optional[str] = None
     business_name: str
     review_title: Optional[str] = None
     review_rating: Optional[int] = None
@@ -73,25 +73,25 @@ def read_root():
     """Root endpoint"""
     return {
         "message": "Welcome to TP API",
-        "endpoints": ["/reviewers", "/businesses", "/reviews"],
+        "endpoints": ["/users", "/businesses", "/reviews"],
     }
 
 
-@app.get("/reviewers", response_model=List[Reviewer])
-def get_reviewers(
+@app.get("/users", response_model=List[User])
+def get_users(
     country: Optional[str] = Query(None, description="Filter by country"),
     name: Optional[str] = Query(None, description="Filter by name (contains)"),
     email: Optional[str] = Query(None, description="Filter by email (contains)"),
     limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
     offset: int = Query(0, description="Offset for pagination", ge=0),
 ):
-    """Get reviewers with optional filtering"""
+    """Get users with optional filtering"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         # Build query with filters
-        query = f"SELECT * FROM {TABLES["reviewers"]} WHERE 1=1"
+        query = f"SELECT * FROM {TABLES["users"]} WHERE 1=1"
         params = []
 
         if country:
@@ -110,9 +110,9 @@ def get_reviewers(
         params.extend([limit, offset])
 
         cursor.execute(query, params)
-        reviewers = cursor.fetchall()
+        users = cursor.fetchall()
 
-        return [Reviewer(**reviewer) for reviewer in reviewers]
+        return [User(**user) for user in users]
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
@@ -169,12 +169,10 @@ def get_reviews(
     business_name: Optional[str] = Query(
         None, description="Filter by business name (contains)"
     ),
-    reviewer_name: Optional[str] = Query(
-        None, description="Filter by reviewer name (contains)"
+    user_name: Optional[str] = Query(
+        None, description="Filter by user name (contains)"
     ),
-    reviewer_country: Optional[str] = Query(
-        None, description="Filter by reviewer country"
-    ),
+    user_country: Optional[str] = Query(None, description="Filter by user country"),
     limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
     offset: int = Query(0, description="Offset for pagination", ge=0),
 ):
@@ -219,13 +217,13 @@ def get_reviews(
             query += " AND business_name ILIKE %s"
             params.append(f"%{business_name}%")
 
-        if reviewer_name:
-            query += " AND reviewer_name ILIKE %s"
-            params.append(f"%{reviewer_name}%")
+        if user_name:
+            query += " AND user_name ILIKE %s"
+            params.append(f"%{user_name}%")
 
-        if reviewer_country:
-            query += " AND reviewer_country ILIKE %s"
-            params.append(f"%{reviewer_country}%")
+        if user_country:
+            query += " AND user_country ILIKE %s"
+            params.append(f"%{user_country}%")
 
         query += " ORDER BY review_date DESC LIMIT %s OFFSET %s"
         params.extend([limit, offset])

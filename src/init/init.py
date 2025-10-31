@@ -1,7 +1,7 @@
 """Data ingestion script for TP API review system.
 
 This module loads denormalized review data from an Excel file, normalizes the
-data into three separate tables (reviewers, businesses, reviews), inserts the data
+data into three separate tables (users, businesses, reviews), inserts the data
 into PostgreSQL and verifies that the data was loaded successfully.
 
 Usage:
@@ -61,7 +61,7 @@ def clean_and_normalize_data(
     df: pd.DataFrame,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Takes denormalized review data and splits it into three normalized
-    tables: reviewers, businesses, and reviews with proper relationships.
+    tables: users, businesses, and reviews with proper relationships.
     Deduplicates entries as needed.
 
     Args:
@@ -73,16 +73,16 @@ def clean_and_normalize_data(
 
     Returns:
         Tuple of three DataFrames:
-        - reviewers_df: Unique reviewers with id, name, email, country
+        - users_df: Unique users with id, name, email, country
         - businesses_df: Unique businesses with id, name
         - reviews_df: Reviews with user_id and business_id foreign keys
     """
 
-    # Extract unique reviewers
-    reviewers_df = df[
+    # Extract unique users
+    users_df = df[
         ["Reviewer Id", "Reviewer Name", "Email Address", "Reviewer Country"]
     ].drop_duplicates(subset=["Reviewer Id"])
-    reviewers_df.columns = ["id", "name", "email", "country"]
+    users_df.columns = ["id", "name", "email", "country"]
 
     # Extract unique businesses
     businesses_df = df[["Business Id", "Business Name"]].drop_duplicates(
@@ -121,25 +121,25 @@ def clean_and_normalize_data(
     reviews_df["rating"] = pd.to_numeric(reviews_df["rating"], errors="coerce")
 
     print("Normalized data:")
-    print(f"- Reviewers: {len(reviewers_df)}")
+    print(f"- Users: {len(users_df)}")
     print(f"- Businesses: {len(businesses_df)}")
     print(f"- Reviews: {len(reviews_df)}", "\n")
 
-    return reviewers_df, businesses_df, reviews_df
+    return users_df, businesses_df, reviews_df
 
 
 def insert_data(
     conn: psycopg2.extensions.connection,
-    reviewers_df: pd.DataFrame,
+    users_df: pd.DataFrame,
     businesses_df: pd.DataFrame,
     reviews_df: pd.DataFrame,
 ) -> None:
-    """Inserts normalized data into reviewers, businesses, and reviews tables using
+    """Inserts normalized data into users, businesses, and reviews tables using
     batch inserts for performance.
 
     Args:
         conn: Active PostgreSQL database connection.
-        reviewers_df: DataFrame with reviewer data (id, name, email, country).
+        users_df: DataFrame with user data (id, name, email, country).
         businesses_df: DataFrame with business data (id, name).
         reviews_df: DataFrame with review data (id, user_id, business_id,
                    title, rating, content, ip_address, date).
@@ -150,16 +150,16 @@ def insert_data(
     cursor = conn.cursor()
 
     try:
-        # Insert reviewers
-        reviewers_data = [tuple(row) for row in reviewers_df.values]
+        # Insert users
+        users_data = [tuple(row) for row in users_df.values]
         execute_values(
             cursor,
-            "INSERT INTO reviewers (id, name, email, country) VALUES %s",
-            reviewers_data,
+            "INSERT INTO users (id, name, email, country) VALUES %s",
+            users_data,
             template=None,
             page_size=100,
         )
-        print("✅ Inserted reviewers data", "\n")
+        print("✅ Inserted users data", "\n")
 
         # Insert businesses
         businesses_data = [tuple(row) for row in businesses_df.values]
@@ -196,7 +196,7 @@ def insert_data(
 
 def verify_tables(conn: psycopg2.extensions.connection) -> None:
     """Verifies that required tables exist in the database and data has been
-    loaded. Checks the row counts in reviewers, businesses, and reviews tables and
+    loaded. Checks the row counts in users, businesses, and reviews tables and
     prints a summary of the data that was loaded.
 
     Args:
@@ -204,8 +204,8 @@ def verify_tables(conn: psycopg2.extensions.connection) -> None:
     """
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM reviewers")
-    reviewer_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM users")
+    user_count = cursor.fetchone()[0]
 
     cursor.execute("SELECT COUNT(*) FROM businesses")
     business_count = cursor.fetchone()[0]
@@ -214,7 +214,7 @@ def verify_tables(conn: psycopg2.extensions.connection) -> None:
     review_count = cursor.fetchone()[0]
 
     print("Database summary:")
-    print(f"- Reviewers: {reviewer_count}")
+    print(f"- Users: {user_count}")
     print(f"- Businesses: {business_count}")
     print(f"- Reviews: {review_count}", "\n")
 
@@ -228,10 +228,10 @@ if __name__ == "__main__":
 
         # Load and process data
         df = load_excel_data(INPUT_DATA_PATH)
-        reviewers_df, businesses_df, reviews_df = clean_and_normalize_data(df)
+        users_df, businesses_df, reviews_df = clean_and_normalize_data(df)
 
         # Insert data
-        insert_data(conn, reviewers_df, businesses_df, reviews_df)
+        insert_data(conn, users_df, businesses_df, reviews_df)
 
         # Verify tables and data
         verify_tables(conn)

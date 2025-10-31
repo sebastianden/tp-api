@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository contains a simple PoC of an API to execute ad-hoc data requests against a database of user reviews. The following sections will explain how to run the PoC locally, its architecture, and how to use the API itself.
+This repository contains a simple PoC of an API to execute ad-hoc data requests against a database of business reviews. The following sections will explain how to run the PoC locally, its architecture, and how to use the API itself.
 
 ## Prerequisites
 
@@ -47,6 +47,8 @@ The script loads the Excel file with data and converts the denormalized table in
 ![Figure 2: Database Schema](./docs/schema.drawio.png)
 
 ## Usage
+
+Docs http://localhost:8000/docs
 
 Examples:
 

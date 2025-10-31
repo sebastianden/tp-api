@@ -1,7 +1,7 @@
 -- Initialize the database with the normalized tables
 
--- Create reviewers table
-CREATE TABLE IF NOT EXISTS reviewers (
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS businesses (
 -- Create reviews table
 CREATE TABLE IF NOT EXISTS reviews (
     id UUID PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES reviewers(id),
+    user_id UUID NOT NULL REFERENCES users(id),
     business_id UUID NOT NULL REFERENCES businesses(id),
     title VARCHAR(255),
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
@@ -38,9 +38,9 @@ SELECT
     r.id as review_id,
     r.user_id,
     r.business_id,
-    u.name as reviewer_name,
-    u.email as reviewer_email,
-    u.country as reviewer_country,
+    u.name as user_name,
+    u.email as user_email,
+    u.country as user_country,
     b.name as business_name,
     r.title as review_title,
     r.rating as review_rating,
@@ -48,6 +48,6 @@ SELECT
     r.ip_address as review_ip_address,
     r.date as review_date
 FROM reviews r
-JOIN reviewers u ON r.user_id = u.id
+JOIN users u ON r.user_id = u.id
 JOIN businesses b ON r.business_id = b.id
 ORDER BY r.date DESC;
