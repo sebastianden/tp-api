@@ -4,10 +4,15 @@ This module provides a REST API for querying a PostgreSQL database for review
 data. The API supports filtering and pagination for users, businesses, and
 reviews with optional CSV export functionality.
 
-Usage:
-    fastapi run
+Exposed Endpoints:
+    GET /users: Retrieve users with optional filtering by country, name, and email.
+    GET /businesses: Retrieve businesses with optional filtering by name.
+    GET /reviews: Retrieve reviews with detailed user and business information,
+                   with optional filtering by rating, user, business, title, content,
+                   business name, user name, and user country.
 
-TODO: Usage and endpoints
+Usage:
+    fastapi run main.py --port 8000
 """
 
 import csv

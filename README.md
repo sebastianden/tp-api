@@ -1,4 +1,4 @@
-# Database API
+# Database API PoC
 
 ## Introduction
 
@@ -7,7 +7,7 @@ This repository contains a simple PoC of an API to execute ad-hoc data requests 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/install) (Included in Docker Desktop)
+- [Docker Compose](https://docs.docker.com/compose/install) (included in Docker Desktop)
 - Python 3.12 or higher
 
 ## Getting Started
@@ -48,32 +48,48 @@ The script loads the Excel file with data and converts the denormalized table in
 
 ## Usage
 
-Docs http://localhost:8000/docs
+For a complete API specification go to the APIs docs at http://localhost:8000/docs.
 
-Examples:
+### Examples
 
-Provide reviews for business X
+Provide reviews for business X (e.g. "Artisan Coffee Roasters"):
 
+```
+http://localhost:8000/reviews?business_name=Artisan%20Coffee%20Roasters
+```
+
+Provide reviews by user Y (e.g. "David Knox"):
+
+```
+http://localhost:8000/reviews?user_name=David%20Knox
+```
+
+Provide user account information for user Z (e.g. "David Knox"):
+
+```
+http://localhost:8000/users?name=Sarah%20Barker
 ```
 
 
-```
-
-Provide reviews by user Y
-
-Provide user account information for user Z
-
-# Developing
+## Developing
 
 Contributions are welcome! Please follow these step to make sure you set up your local development correctly and adhere to the conventions followed in the project:
 
-initialize pre-commit hooks
-
+```bash
+# Create a new virtual environment
+python -m venv .venv
+# Activate it
+source .venv/bin/activate
+# Install (development) requirements
+pip install -r requirements.txt
 ```
+
+The pre-commit hooks will automatically lint and format your code on commit as well as enforce branch naming conventions and semantic commit messages. It also runs security scans of your code and the projects unit tests. To install them run:
+
+```bash
+# Install the projects pre-commit hooks
 pre-commit install --hook-type pre-commit --hook-type commit-msg
 ```
-
-venv
 
 ## FAQ
 
