@@ -26,7 +26,6 @@ This will create the following application:
 
 Will also initialize the database with tables and schemas
 
-
 ### 2. Initialize and Populate Database Schema and Tables
 
 To test our API we need to load the data from the `tp_reviews.xlsx` into the database. A helper script takes care of that. You can find it under `src/init/init.py`. To execute it, run the following commands in a terminal from the root directory of this repository:
@@ -69,7 +68,6 @@ Provide user account information for user Z (e.g. "Sahra Barker"):
 ```
 http://localhost:8000/users?name=Sarah%20Barker
 ```
-
 
 ## Developing
 

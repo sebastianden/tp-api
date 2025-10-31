@@ -116,7 +116,7 @@ def clean_and_normalize_data(
     ]
 
     # Convert date to proper datetime format
-    reviews_df["date"] = pd.to_datetime(reviews_df["date"], utc=True)
+    reviews_df["date"] = pd.to_datetime(reviews_df["date"])
 
     # Clean rating column (ensure it's integer)
     reviews_df["rating"] = pd.to_numeric(reviews_df["rating"], errors="coerce")

@@ -95,7 +95,7 @@ def read_root():
     }
 
 
-@app.get("/users", response_model=List[User])
+@app.get("/users", response_class=StreamingResponse)
 def get_users(
     country: Optional[str] = Query(None, description="Filter by country"),
     name: Optional[str] = Query(None, description="Filter by name (contains)"),
@@ -103,7 +103,7 @@ def get_users(
     limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
     offset: int = Query(0, description="Offset for pagination", ge=0),
 ):
-    """Get users with optional filtering"""
+    """Get users as CSV download"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -130,7 +130,9 @@ def get_users(
         cursor.execute(query, params)
         users = cursor.fetchall()
 
-        return [User(**user) for user in users]
+        # Convert to list of dictionaries for CSV
+        users_data = [dict(user) for user in users]
+        return create_csv_response(users_data, "users.csv")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
@@ -139,13 +141,13 @@ def get_users(
         conn.close()
 
 
-@app.get("/businesses", response_model=List[Business])
+@app.get("/businesses", response_class=StreamingResponse)
 def get_businesses(
     name: Optional[str] = Query(None, description="Filter by business name (contains)"),
     limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
     offset: int = Query(0, description="Offset for pagination", ge=0),
 ):
-    """Get businesses with optional filtering"""
+    """Get businesses as CSV download"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -164,7 +166,9 @@ def get_businesses(
         cursor.execute(query, params)
         businesses = cursor.fetchall()
 
-        return [Business(**business) for business in businesses]
+        # Convert to list of dictionaries for CSV
+        businesses_data = [dict(business) for business in businesses]
+        return create_csv_response(businesses_data, "businesses.csv")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
@@ -174,7 +178,7 @@ def get_businesses(
 
 
 # pylint: disable=too-many-arguments, too-many-locals, too-many-positional-arguments
-@app.get("/reviews", response_model=List[Review])
+@app.get("/reviews", response_class=StreamingResponse)
 def get_reviews(
     rating: Optional[int] = Query(None, description="Filter by rating", ge=1, le=5),
     min_rating: Optional[int] = Query(None, description="Minimum rating", ge=1, le=5),
@@ -195,7 +199,7 @@ def get_reviews(
     limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
     offset: int = Query(0, description="Offset for pagination", ge=0),
 ):
-    """Get reviews with detailed user and business information"""
+    """Get reviews as CSV download"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -250,7 +254,9 @@ def get_reviews(
         cursor.execute(query, params)
         reviews = cursor.fetchall()
 
-        return [Review(**review) for review in reviews]
+        # Convert to list of dictionaries for CSV
+        reviews_data = [dict(review) for review in reviews]
+        return create_csv_response(reviews_data, "reviews.csv")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
