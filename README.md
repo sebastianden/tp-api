@@ -17,9 +17,8 @@ tp-api/
 │   │   ├── main.py             # FastAPI app with CSV endpoints
 │   │   ├── requirements.txt    # API-specific Python dependencies
 │   │   └── test_main.py        # Minimal unit tests with mocking
-│   ├── db/                     # Database initialization
-│   │   └── init.sql/           # SQL scripts for schema and data setup
-│   └── init/                   # Data ingestion pipeline
+│   └── db/                     # Database setup and data initialization
+│       ├── init.sql/           # SQL scripts for schema and data setup
 │       ├── init.py             # Excel to PostgreSQL ETL script
 │       └── tp_reviews.xlsx     # Source data file
 ├── .pre-commit-config.yaml     # Code quality hooks (ruff, bandit, pytest)
@@ -62,7 +61,7 @@ It will also already create the database schema and tables by running a SQL stat
 
 ### 2. Initialize and Populate Database Schema and Tables
 
-To test our API we need to load the data from the `tp_reviews.xlsx` into the database. A helper script takes care of that. You can find it under `src/init/init.py`. To execute it, run the following commands in a terminal from the root directory of this repository:
+To test our API we need to load the data from the `tp_reviews.xlsx` into the database. A helper script takes care of that. You can find it under `src/db/init.py`. To execute it, run the following commands in a terminal from the root directory of this repository:
 
 ```bash
 # Create a new virtual environment
@@ -72,7 +71,7 @@ source .venv/bin/activate
 # Install project dependencies
 pip install -e .
 # Execute the init script
-python src/init/init.py
+python src/db/init.py
 ```
 
 The script loads the Excel file with data and converts the denormalized table into three separate tables to reflect a more realistic database setup. We're left with a simple star schema with a facts table (`reviews`) and two dimension tables (`reviewers` and `businesses`). The `reviews` table has foreign keys to the other two tables. Additionally a view (`review_details`) is created by (re)joining the reviews data to allow for simpler API queries of more detailed review data. The schema is also visualized below:
