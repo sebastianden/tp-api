@@ -58,7 +58,7 @@ This will create the following application:
 
 ![Figure 1: Solution Architecture](./docs/architecture.drawio.png)
 
-Will also initialize the database with tables and schemas
+It will also already create the database schema and tables by running a SQL statement when the PostgreSQL container starts.
 
 ### 2. Initialize and Populate Database Schema and Tables
 
