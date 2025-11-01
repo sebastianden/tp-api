@@ -1,8 +1,10 @@
 bandit>=1.8.6
 fastapi[standard]>=0.104.0
+httpx>=0.25.0
 openpyxl>=3.1.0
 pandas>=2.0.0
 pre-commit>=4.3.0
 psycopg2-binary>=2.9.0
 pydantic>=2.0.0
 pylint>=4.0.2
+pytest>=7.0.0

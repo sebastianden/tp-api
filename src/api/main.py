@@ -43,13 +43,15 @@ def get_db_password():
         raise RuntimeError(f"Error reading password file {password_file}: {e}") from e
 
 
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", "5432")),
-    "database": os.getenv("DB_NAME", "postgres"),
-    "user": os.getenv("DB_USER", "postgres"),
-    "password": get_db_password(),
-}
+def get_db_config():
+    """Get database configuration with lazy password loading."""
+    return {
+        "host": os.getenv("DB_HOST", "localhost"),
+        "port": int(os.getenv("DB_PORT", "5432")),
+        "database": os.getenv("DB_NAME", "postgres"),
+        "user": os.getenv("DB_USER", "postgres"),
+        "password": get_db_password(),
+    }
 
 
 # Pydantic models for response schemas
@@ -89,7 +91,7 @@ class Review(BaseModel):
 def get_db_connection():
     """Get database connection"""
     try:
-        conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
+        conn = psycopg2.connect(**get_db_config(), cursor_factory=RealDictCursor)
         return conn
     except Exception as e:
         raise HTTPException(

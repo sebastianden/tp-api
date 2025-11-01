@@ -47,9 +47,16 @@ repos:
         language: system
         types: [python]
         require_serial: true
+      - id: pytest
+        name: pytest
+        entry: python -m pytest src/api/
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.4
     hooks:
       - id: bandit
         name: bandit
-        args: ["-r", "./src/"]
+        args: ["--skip", "B101", "-r", "./src/"]

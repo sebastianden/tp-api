@@ -27,10 +27,14 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 -- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_users_name ON users(name);
 CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_business_id ON reviews(business_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
 CREATE INDEX IF NOT EXISTS idx_reviews_date ON reviews(date);
+
+-- TODO: Maybe materialized view?
+-- TODO: Correct indices for view performance?
 
 -- Create a view for denormalized data (for reporting)
 CREATE OR REPLACE VIEW review_details AS
