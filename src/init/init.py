@@ -39,7 +39,6 @@ def get_db_password():
         raise
 
 
-# pylint: disable=R0801
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "port": int(os.getenv("DB_PORT", "5432")),
@@ -188,7 +187,6 @@ def insert_data(
         # Insert reviews
         reviews_data = [tuple(row) for row in reviews_df.values]
 
-        # pylint: disable=line-too-long
         execute_values(
             cursor,
             "INSERT INTO reviews (id, user_id, business_id, title, rating, content, ip_address, date) VALUES %s",
@@ -258,5 +256,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-
     main()

@@ -198,9 +198,8 @@ def get_businesses(
         conn.close()
 
 
-# pylint: disable=too-many-arguments, too-many-branches, too-many-locals, too-many-positional-arguments
 @app.get("/reviews", response_class=StreamingResponse)
-def get_reviews(
+def get_reviews(  # noqa: PLR0912 PLR0913
     rating: Optional[int] = Query(None, description="Filter by rating", ge=1, le=5),
     min_rating: Optional[int] = Query(None, description="Minimum rating", ge=1, le=5),
     max_rating: Optional[int] = Query(None, description="Maximum rating", ge=1, le=5),

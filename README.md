@@ -8,7 +8,7 @@ This repository contains a simple PoC of an API to execute ad-hoc data requests 
 
 ```
 tp-api/
-├── .pre-commit-config.yaml     # Code quality hooks (black, pylint, bandit, pytest)
+├── .pre-commit-config.yaml     # Code quality hooks (ruff, bandit, pytest)
 ├── docker-compose.yml          # Multi-container orchestration (PostgreSQL + FastAPI)
 ├── requirements.txt            # Python dependencies for development
 ├── benchmark.sh                # Performance testing script with progress bars

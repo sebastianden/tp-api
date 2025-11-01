@@ -1,13 +1,13 @@
 """Minimal tests for TP API endpoints and CSV functionality."""
 
-# pylint: disable=redefined-outer-name
-
 from unittest.mock import patch, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from main import app, create_csv_response
+
+SUCCESS_STATUS = 200
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def mock_db():
 def test_root_endpoint(client):
     """Test root endpoint returns welcome message."""
     response = client.get("/")
-    assert response.status_code == 200
+    assert response.status_code == SUCCESS_STATUS
     data = response.json()
     assert data["message"] == "Welcome to TP API"
 
@@ -43,7 +43,7 @@ def test_users_endpoint(mock_get_db, client, mock_db):
     ]
 
     response = client.get("/users")
-    assert response.status_code == 200
+    assert response.status_code == SUCCESS_STATUS
     assert response.headers["content-type"] == "text/csv; charset=utf-8"
 
 
@@ -55,7 +55,7 @@ def test_businesses_endpoint(mock_get_db, client, mock_db):
     mock_cursor.fetchall.return_value = [{"id": "biz1", "name": "Acme Corp"}]
 
     response = client.get("/businesses")
-    assert response.status_code == 200
+    assert response.status_code == SUCCESS_STATUS
     assert response.headers["content-type"] == "text/csv; charset=utf-8"
 
 
@@ -69,7 +69,7 @@ def test_reviews_endpoint(mock_get_db, client, mock_db):
     ]
 
     response = client.get("/reviews")
-    assert response.status_code == 200
+    assert response.status_code == SUCCESS_STATUS
     assert response.headers["content-type"] == "text/csv; charset=utf-8"
 
 
@@ -80,7 +80,7 @@ def test_csv_response_with_data():
 
     assert response.media_type == "text/csv"
     assert "filename=test.csv" in response.headers["Content-Disposition"]
-    assert response.status_code == 200
+    assert response.status_code == SUCCESS_STATUS
 
 
 def test_csv_response_empty_data():
@@ -89,4 +89,4 @@ def test_csv_response_empty_data():
 
     assert response.media_type == "text/csv"
     assert "filename=empty.csv" in response.headers["Content-Disposition"]
-    assert response.status_code == 200
+    assert response.status_code == SUCCESS_STATUS

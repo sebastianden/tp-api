@@ -33,20 +33,13 @@ repos:
       - id: check-toml
       - id: check-case-conflict
       - id: check-ast
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: "24.4.2"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.3
     hooks:
-      - id: black
-        name: black
-        language_version: python3
+      - id: ruff-check
+      - id: ruff-format
   - repo: local
     hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint src/
-        language: system
-        types: [python]
-        require_serial: true
       - id: pytest
         name: pytest
         entry: python -m pytest src/api/
