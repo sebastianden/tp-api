@@ -1,2 +1,47 @@
+[project]
+name = "tp-api"
+version = "0.1.0"
+description = "PoC API for business reviews database queries with CSV export"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.104.0",
+    "httpx>=0.25.0",
+    "openpyxl>=3.1.0",
+    "pandas>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "bandit>=1.8.6",
+    "pre-commit>=4.3.0",
+    "pytest>=7.0.0",
+    "ruff>=0.14.3",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --disable-warnings"
+testpaths = [
+    "src/api/test_main.py",
+]
+python_files = [
+    "test_*.py",
+    "*_test.py",
+]
+python_functions = [
+    "test_*",
+]
+python_classes = [
+    "Test*",
+]
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
 [tool.ruff.lint]
 select = ["PL"]

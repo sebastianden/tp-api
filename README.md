@@ -8,24 +8,25 @@ This repository contains a simple PoC of an API to execute ad-hoc data requests 
 
 ```
 tp-api/
-├── .pre-commit-config.yaml     # Code quality hooks (ruff, bandit, pytest)
-├── docker-compose.yml          # Multi-container orchestration (PostgreSQL + FastAPI)
-├── requirements.txt            # Python dependencies for development
-├── benchmark.sh                # Performance testing script with progress bars
+├── docs/                       # Additional documentation, e.g. images
 ├── secrets/                    # Docker secrets for secure password management
 │   └── db_password.txt         # Database password (gitignored)
-├── docs/                       # Additional documentation, e.g. images
-└── src/                        # Source code
-    ├── api/                    # FastAPI application
-    │   ├── Dockerfile          # API container configuration
-    │   ├── main.py             # FastAPI app with CSV endpoints
-    │   ├── requirements.txt    # API-specific Python dependencies
-    │   └── test_main.py        # Minimal unit tests with mocking
-    ├── db/                     # Database initialization
-    │   └── init.sql/           # SQL scripts for schema and data setup
-    └── init/                   # Data ingestion pipeline
-        ├── init.py             # Excel to PostgreSQL ETL script
-        └── tp_reviews.xlsx     # Source data file
+├── src/                        # Source code
+│   ├── api/                    # FastAPI application
+│   │   ├── Dockerfile          # API container configuration
+│   │   ├── main.py             # FastAPI app with CSV endpoints
+│   │   ├── requirements.txt    # API-specific Python dependencies
+│   │   └── test_main.py        # Minimal unit tests with mocking
+│   ├── db/                     # Database initialization
+│   │   └── init.sql/           # SQL scripts for schema and data setup
+│   └── init/                   # Data ingestion pipeline
+│       ├── init.py             # Excel to PostgreSQL ETL script
+│       └── tp_reviews.xlsx     # Source data file
+├── .pre-commit-config.yaml     # Code quality hooks (ruff, bandit, pytest)
+├── benchmark.sh                # Performance testing script with progress bars
+├── docker-compose.yml          # Multi-container orchestration (PostgreSQL + FastAPI)
+├── pyproject.toml              # Python project config and dependencies
+└── README.md                   # This file
 ```
 
 ## Prerequisites
@@ -68,8 +69,10 @@ To test our API we need to load the data from the `tp_reviews.xlsx` into the dat
 python -m venv .venv
 # Activate it
 source .venv/bin/activate
-# Install (development) requirements
-pip install -r requirements.txt
+# Install project dependencies
+pip install -e .
+# Install development dependencies
+pip install -e ".[dev]"
 # Execute the init script
 python src/init/init.py
 ```
@@ -111,8 +114,8 @@ Contributions are welcome! Please follow these step to make sure you set up your
 python -m venv .venv
 # Activate it
 source .venv/bin/activate
-# Install (development) requirements
-pip install -r requirements.txt
+# Install project with development dependencies
+pip install -e ".[dev]"
 ```
 
 The pre-commit hooks will automatically lint and format your code on commit as well as enforce branch naming conventions and semantic commit messages. It also runs security scans of your code and the projects unit tests. To install them run:
