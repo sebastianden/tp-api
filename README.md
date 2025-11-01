@@ -71,8 +71,6 @@ python -m venv .venv
 source .venv/bin/activate
 # Install project dependencies
 pip install -e .
-# Install development dependencies
-pip install -e ".[dev]"
 # Execute the init script
 python src/init/init.py
 ```
