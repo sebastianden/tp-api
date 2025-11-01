@@ -113,8 +113,9 @@ def get_users(
     country: Optional[str] = Query(None, description="Filter by country"),
     name: Optional[str] = Query(None, description="Filter by name (contains)"),
     email: Optional[str] = Query(None, description="Filter by email (contains)"),
-    limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
-    offset: int = Query(0, description="Offset for pagination", ge=0),
+    limit: Optional[int] = Query(
+        None, description="Limit number of results (optional)", ge=1, le=10000
+    ),
 ):
     """Get users as CSV download"""
     conn = get_db_connection()
@@ -137,8 +138,11 @@ def get_users(
             query += " AND email ILIKE %s"
             params.append(f"%{email}%")
 
-        query += " ORDER BY id LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
+        query += " ORDER BY id"
+
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
 
         cursor.execute(query, params)
         users = cursor.fetchall()
@@ -157,8 +161,9 @@ def get_users(
 @app.get("/businesses", response_class=StreamingResponse)
 def get_businesses(
     name: Optional[str] = Query(None, description="Filter by business name (contains)"),
-    limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
-    offset: int = Query(0, description="Offset for pagination", ge=0),
+    limit: Optional[int] = Query(
+        None, description="Limit number of results (optional)", ge=1, le=10000
+    ),
 ):
     """Get businesses as CSV download"""
     conn = get_db_connection()
@@ -173,8 +178,11 @@ def get_businesses(
             query += " AND name ILIKE %s"
             params.append(f"%{name}%")
 
-        query += " ORDER BY id LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
+        query += " ORDER BY id"
+
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
 
         cursor.execute(query, params)
         businesses = cursor.fetchall()
@@ -190,7 +198,7 @@ def get_businesses(
         conn.close()
 
 
-# pylint: disable=too-many-arguments, too-many-locals, too-many-positional-arguments
+# pylint: disable=too-many-arguments, too-many-branches, too-many-locals, too-many-positional-arguments
 @app.get("/reviews", response_class=StreamingResponse)
 def get_reviews(
     rating: Optional[int] = Query(None, description="Filter by rating", ge=1, le=5),
@@ -209,8 +217,9 @@ def get_reviews(
         None, description="Filter by user name (contains)"
     ),
     user_country: Optional[str] = Query(None, description="Filter by user country"),
-    limit: int = Query(100, description="Limit number of results", ge=1, le=1000),
-    offset: int = Query(0, description="Offset for pagination", ge=0),
+    limit: Optional[int] = Query(
+        None, description="Limit number of results (optional)", ge=1, le=10000
+    ),
 ):
     """Get reviews as CSV download"""
     conn = get_db_connection()
@@ -261,8 +270,11 @@ def get_reviews(
             query += " AND user_country ILIKE %s"
             params.append(f"%{user_country}%")
 
-        query += " ORDER BY review_date DESC LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
+        query += " ORDER BY review_date DESC"
+
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
 
         cursor.execute(query, params)
         reviews = cursor.fetchall()
