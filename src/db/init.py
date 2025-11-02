@@ -16,7 +16,6 @@ Environment Variables:
 """
 
 import os
-from typing import Tuple
 
 import pandas as pd
 import psycopg2
@@ -29,10 +28,10 @@ PASSWORD_FILE = os.path.join(SCRIPT_DIR, "../../secrets/db_password.txt")
 
 
 # Database connection parameters
-def get_db_password():
+def get_db_password() -> str:
     """Get database password from Docker secret file."""
     try:
-        with open(PASSWORD_FILE, "r", encoding="utf-8") as f:
+        with open(PASSWORD_FILE, encoding="utf-8") as f:
             return f.read().strip()
     except Exception as e:
         print(f"❌ Error loading password file: {e}")
@@ -49,7 +48,7 @@ DB_CONFIG = {
 
 
 def load_excel_data(file_path: str) -> pd.DataFrame:
-    """Loads data from Excel file.
+    """Load data from Excel file.
 
     Args:
         file_path: Path to the Excel file to load.
@@ -59,22 +58,24 @@ def load_excel_data(file_path: str) -> pd.DataFrame:
 
     Raises:
         Exception: If the Excel file cannot be loaded.
+
     """
     try:
         df = pd.read_excel(file_path)
-        print(f"✅ Loaded {len(df)} rows from Excel file")
-        return df
     except Exception as e:
         print(f"❌ Error loading Excel file: {e}")
         raise
+    else:
+        print(f"✅ Loaded {len(df)} rows from Excel file")
+        return df
 
 
 def clean_and_normalize_data(
     df: pd.DataFrame,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Takes denormalized review data and splits it into three normalized
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Take denormalized review data and split it into three normalized
     tables: users, businesses, and reviews with proper relationships.
-    Deduplicates entries as needed.
+    Deduplicate entries as needed.
 
     Args:
         df: Raw DataFrame containing denormalized review data with columns:
@@ -88,17 +89,17 @@ def clean_and_normalize_data(
         - users_df: Unique users with id, name, email, country
         - businesses_df: Unique businesses with id, name
         - reviews_df: Reviews with user_id and business_id foreign keys
-    """
 
+    """
     # Extract unique users
-    users_df = df[
-        ["Reviewer Id", "Reviewer Name", "Email Address", "Reviewer Country"]
-    ].drop_duplicates(subset=["Reviewer Id"])
+    users_df = df[["Reviewer Id", "Reviewer Name", "Email Address", "Reviewer Country"]].drop_duplicates(
+        subset=["Reviewer Id"],
+    )
     users_df.columns = ["id", "name", "email", "country"]
 
     # Extract unique businesses
     businesses_df = df[["Business Id", "Business Name"]].drop_duplicates(
-        subset=["Business Id"]
+        subset=["Business Id"],
     )
     businesses_df.columns = ["id", "name"]
 
@@ -146,7 +147,7 @@ def insert_data(
     businesses_df: pd.DataFrame,
     reviews_df: pd.DataFrame,
 ) -> None:
-    """Inserts normalized data into users, businesses, and reviews tables using
+    """Insert normalized data into users, businesses, and review tables using
     batch inserts for performance.
 
     Args:
@@ -158,12 +159,13 @@ def insert_data(
 
     Raises:
         Exception: If database insertion fails, rolls back transaction.
+
     """
     cursor = conn.cursor()
 
     try:
         # Insert users
-        users_data = [tuple(row) for row in users_df.values]
+        users_data = [tuple(row) for row in users_df.to_numpy()]
         execute_values(
             cursor,
             "INSERT INTO users (id, name, email, country) VALUES %s",
@@ -174,7 +176,7 @@ def insert_data(
         print("✅ Inserted users data", "\n")
 
         # Insert businesses
-        businesses_data = [tuple(row) for row in businesses_df.values]
+        businesses_data = [tuple(row) for row in businesses_df.to_numpy()]
         execute_values(
             cursor,
             "INSERT INTO businesses (id, name) VALUES %s",
@@ -185,7 +187,7 @@ def insert_data(
         print("✅ Inserted businesses data", "\n")
 
         # Insert reviews
-        reviews_data = [tuple(row) for row in reviews_df.values]
+        reviews_data = [tuple(row) for row in reviews_df.to_numpy()]
 
         execute_values(
             cursor,
@@ -206,12 +208,13 @@ def insert_data(
 
 
 def verify_tables(conn: psycopg2.extensions.connection) -> None:
-    """Verifies that required tables exist in the database and data has been
-    loaded. Checks the row counts in users, businesses, and reviews tables and
-    prints a summary of the data that was loaded.
+    """Verifiy that required tables exist in the database and data has been
+    loaded. Check the row counts in users, businesses, and reviews tables and
+    print a summary of the data that was loaded.
 
     Args:
         conn: Active PostgreSQL database connection.
+
     """
     cursor = conn.cursor()
 
@@ -231,7 +234,7 @@ def verify_tables(conn: psycopg2.extensions.connection) -> None:
 
 
 def main() -> None:
-    """Main function to load, process, insert, and verify data."""
+    """Load data, processes it, insert it into the database."""
     try:
         # Connect to database
         conn = psycopg2.connect(**DB_CONFIG)

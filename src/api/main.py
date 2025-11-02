@@ -19,31 +19,33 @@ import csv
 import io
 import os
 from datetime import datetime
-from typing import List, Optional
+from typing import Annotated
 
-from fastapi import FastAPI, Query, HTTPException
-from fastapi.responses import StreamingResponse
 import psycopg2
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel
 
 app = FastAPI(
-    title="TP API", description="API for making ad-hoc queries on the reviews database"
+    title="TP API",
+    description="API for making ad-hoc queries on the reviews database",
 )
 
 
 # Database connection parameters
-def get_db_password():
+def get_db_password() -> str:
     """Get database password from Docker secret file."""
     password_file = os.getenv("DB_PASSWORD_FILE")
     try:
-        with open(password_file, "r", encoding="utf-8") as f:
+        with open(password_file, encoding="utf-8") as f:
             return f.read().strip()
     except Exception as e:
-        raise RuntimeError(f"Error reading password file {password_file}: {e}") from e
+        msg = f"Error reading password file {password_file}: {e}"
+        raise RuntimeError(msg) from e
 
 
-def get_db_config():
+def get_db_config() -> dict:
     """Get database configuration with lazy password loading."""
     return {
         "host": os.getenv("DB_HOST", "localhost"),
@@ -61,7 +63,7 @@ class User(BaseModel):
     id: str
     name: str
     email: str
-    country: Optional[str] = None
+    country: str | None = None
 
 
 class Business(BaseModel):
@@ -79,29 +81,29 @@ class Review(BaseModel):
     business_id: str
     user_name: str
     user_email: str
-    user_country: Optional[str] = None
+    user_country: str | None = None
     business_name: str
-    review_title: Optional[str] = None
-    review_rating: Optional[int] = None
-    review_content: Optional[str] = None
-    review_ip_address: Optional[str] = None
-    review_date: Optional[datetime] = None
+    review_title: str | None = None
+    review_rating: int | None = None
+    review_content: str | None = None
+    review_ip_address: str | None = None
+    review_date: datetime | None = None
 
 
-def get_db_connection():
-    """Get database connection"""
+def get_db_connection() -> psycopg2.extensions.connection:
+    """Get database connection."""
     try:
-        conn = psycopg2.connect(**get_db_config(), cursor_factory=RealDictCursor)
-        return conn
+        return psycopg2.connect(**get_db_config(), cursor_factory=RealDictCursor)
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Database connection error: {str(e)}"
+            status_code=500,
+            detail=f"Database connection error: {e!s}",
         ) from e
 
 
 @app.get("/")
-def read_root():
-    """Root endpoint"""
+def read_root() -> dict:
+    """Root endpoint."""
     return {
         "message": "Welcome to TP API",
         "endpoints": ["/users", "/businesses", "/reviews"],
@@ -110,14 +112,18 @@ def read_root():
 
 @app.get("/users", response_class=StreamingResponse)
 def get_users(
-    country: Optional[str] = Query(None, description="Filter by country"),
-    name: Optional[str] = Query(None, description="Filter by name (contains)"),
-    email: Optional[str] = Query(None, description="Filter by email (contains)"),
-    limit: Optional[int] = Query(
-        None, description="Limit number of results (optional)", ge=1, le=10000
-    ),
-):
-    """Get users as CSV download"""
+    country: Annotated[str | None, Query(description="Filter by country")] = None,
+    name: Annotated[str | None, Query(description="Filter by name (contains)")] = None,
+    email: Annotated[
+        str | None,
+        Query(description="Filter by email (contains)"),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        Query(description="Limit number of results (optional)", ge=1, le=10000),
+    ] = None,
+) -> StreamingResponse:
+    """Get users as CSV download."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -152,7 +158,7 @@ def get_users(
         return create_csv_response(users_data, "users.csv")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Database error: {e!s}") from e
     finally:
         cursor.close()
         conn.close()
@@ -160,12 +166,16 @@ def get_users(
 
 @app.get("/businesses", response_class=StreamingResponse)
 def get_businesses(
-    name: Optional[str] = Query(None, description="Filter by business name (contains)"),
-    limit: Optional[int] = Query(
-        None, description="Limit number of results (optional)", ge=1, le=10000
-    ),
-):
-    """Get businesses as CSV download"""
+    name: Annotated[
+        str | None,
+        Query(description="Filter by business name (contains)"),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        Query(description="Limit number of results (optional)", ge=1, le=10000),
+    ] = None,
+) -> StreamingResponse:
+    """Get businesses as CSV download."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -192,35 +202,57 @@ def get_businesses(
         return create_csv_response(businesses_data, "businesses.csv")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Database error: {e!s}") from e
     finally:
         cursor.close()
         conn.close()
 
 
 @app.get("/reviews", response_class=StreamingResponse)
-def get_reviews(  # noqa: PLR0912 PLR0913
-    rating: Optional[int] = Query(None, description="Filter by rating", ge=1, le=5),
-    min_rating: Optional[int] = Query(None, description="Minimum rating", ge=1, le=5),
-    max_rating: Optional[int] = Query(None, description="Maximum rating", ge=1, le=5),
-    user_id: Optional[str] = Query(None, description="Filter by user ID"),
-    business_id: Optional[str] = Query(None, description="Filter by business ID"),
-    title: Optional[str] = Query(None, description="Filter by review title (contains)"),
-    content: Optional[str] = Query(
-        None, description="Filter by review content (contains)"
-    ),
-    business_name: Optional[str] = Query(
-        None, description="Filter by business name (contains)"
-    ),
-    user_name: Optional[str] = Query(
-        None, description="Filter by user name (contains)"
-    ),
-    user_country: Optional[str] = Query(None, description="Filter by user country"),
-    limit: Optional[int] = Query(
-        None, description="Limit number of results (optional)", ge=1, le=10000
-    ),
-):
-    """Get reviews as CSV download"""
+def get_reviews(  # noqa: C901 PLR0912 PLR0913
+    rating: Annotated[
+        int | None,
+        Query(description="Filter by rating", ge=1, le=5),
+    ] = None,
+    min_rating: Annotated[
+        int | None,
+        Query(description="Minimum rating", ge=1, le=5),
+    ] = None,
+    max_rating: Annotated[
+        int | None,
+        Query(description="Maximum rating", ge=1, le=5),
+    ] = None,
+    user_id: Annotated[str | None, Query(description="Filter by user ID")] = None,
+    business_id: Annotated[
+        str | None,
+        Query(description="Filter by business ID"),
+    ] = None,
+    title: Annotated[
+        str | None,
+        Query(description="Filter by review title (contains)"),
+    ] = None,
+    content: Annotated[
+        str | None,
+        Query(description="Filter by review content (contains)"),
+    ] = None,
+    business_name: Annotated[
+        str | None,
+        Query(description="Filter by business name (contains)"),
+    ] = None,
+    user_name: Annotated[
+        str | None,
+        Query(description="Filter by user name (contains)"),
+    ] = None,
+    user_country: Annotated[
+        str | None,
+        Query(description="Filter by user country"),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        Query(description="Limit number of results (optional)", ge=1, le=10000),
+    ] = None,
+) -> StreamingResponse:
+    """Get reviews as CSV download."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -283,13 +315,13 @@ def get_reviews(  # noqa: PLR0912 PLR0913
         return create_csv_response(reviews_data, "reviews.csv")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Database error: {e!s}") from e
     finally:
         cursor.close()
         conn.close()
 
 
-def create_csv_response(data: List[dict], filename: str) -> StreamingResponse:
+def create_csv_response(data: list[dict], filename: str) -> StreamingResponse:
     """Create a CSV streaming response from query results.
 
     Args:
@@ -298,6 +330,7 @@ def create_csv_response(data: List[dict], filename: str) -> StreamingResponse:
 
     Returns:
         StreamingResponse with CSV data for download
+
     """
     if not data:
         # Return empty CSV with headers if no data

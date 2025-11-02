@@ -43,5 +43,9 @@ markers = [
     "unit: marks tests as unit tests",
 ]
 
+[tool.ruff]
+line-length = 120
+
 [tool.ruff.lint]
-select = ["PL"]
+select = ["ALL"]
+ignore = ["D205", "INP001", "PTH100", "PTH118", "PTH120", "PTH123", "T201"]
