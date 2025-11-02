@@ -4,7 +4,7 @@
 # Sends multiple curl requests and measures average response time
 
 # Configuration
-URL="http://localhost:8000/reviews?user_name=Sarah%20Barker"
+URL="http://localhost:8000/reviews?business_name=Artisan%20Coffee%20Roasters"
 NUM_REQUESTS=10
 OUTPUT_FILE="/dev/null"  # Set to a filename if you want to save responses
 
