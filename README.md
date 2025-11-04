@@ -150,4 +150,4 @@ A: Absolutely. I use LLMs in my daily work from ideation phase to code autocompl
 
 *Q: Cool, can we ship it?*
 
-A: Hold on a sec. I'd like to get a second opinion on this and a good code review. I believe the (base) Docker image should be pinned to a specific one and ran through a vulnerability scanning tool. The DB secret management would have to be fitted to whatever the team decides to use (Kubernetes or Cloud secret store). Also there is no CI/CD pipeline and a complete lack of deployment automation as this is only a PoC.
+A: Hold on a sec. I'd like to get a second opinion on this and a good code review. I believe the (base) Docker image should be pinned to a specific one and ran through a vulnerability scanning tool. The DB secret management would have to be fitted to whatever the team decides to use (Kubernetes or Cloud secret store). Even though it's an API meant for internal use, you probably would want to build in some authentication mechanism. Also there is no CI/CD pipeline and a complete lack of deployment automation as this is only a PoC.
